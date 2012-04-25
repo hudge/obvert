@@ -1,2 +1,2 @@
-require "./obvert"
+require "./blog"
 run Blog.new
