@@ -22,24 +22,24 @@ module Blog
   end
 
   def render_home_page
-    Rack::Response.new(Mustache.render(<<-MUSTACHE, posts: posts))
-    <ul>
-    {{#posts}}
-      <li>{{title}}</li>
-    {{/posts}}
-    </ul>
-    MUSTACHE
+    Rack::Response.new(Mustache.render(<<MUSTACHE, posts: posts))
+<ul>
+{{#posts}}
+  <li>{{title}}</li>
+{{/posts}}
+</ul>
+MUSTACHE
   end
 
   def find_and_render_post(id)
-    post = posts.find { |p| p.id == $1 }
+    post = posts.find { |p| p.id == id }
 
-    Rack::Response.new(Mustache.render(<<-MUSTACHE, post: post))
+    Rack::Response.new(Mustache.render(<<MUSTACHE, post: post))
 {{#post}}
 <h1>{{title}}</h1>
 {{body}}
 {{/post}}
-    MUSTACHE
+MUSTACHE
   end
 
   def not_found
@@ -111,6 +111,18 @@ describe "A blog web application" do
 
     it "successfully returns a response" do
       last_response.should be_ok
+    end
+
+    it "contains the post title" do
+      last_response.body.should include("<h1>Title 1</h1>")
+    end
+
+    it "contains the post body" do
+      last_response.body.should include("Foo")
+    end
+
+    it "returns an HTML page" do
+      last_response.content_type.should == "text/html"
     end
   end
 
