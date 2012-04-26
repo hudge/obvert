@@ -1,4 +1,4 @@
-require_relative "../views/blog_index_view"
+require File.expand_path("../../views/blog_index_view", __FILE__)
 
 class BlogController
   attr_reader :request

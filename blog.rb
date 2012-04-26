@@ -1,10 +1,10 @@
-require_relative "obvert"
-require_relative "controllers/blog_controller"
+require File.expand_path("../obvert", __FILE__)
+require File.expand_path("../controllers/blog_controller", __FILE__)
 
 class Blog < Obvert::Application
   def dispatcher
     {
-      "/" => BlogController.instance_method(:index)
+      "/" => proc { |request| BlogController.new(request).index }
     }
   end
 end

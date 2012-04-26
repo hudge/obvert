@@ -17,7 +17,7 @@ module Obvert
       _, action = dispatcher.find { |route, _| route === request.path }
 
       if action
-        action.bind(action.owner.new(request)).call
+        action.call(request)
       else
         not_found
       end

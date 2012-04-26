@@ -1,5 +1,5 @@
 require "rack/test"
-require_relative "../blog"
+require File.expand_path("../../blog", __FILE__)
 
 describe Blog do
   include Rack::Test::Methods
@@ -9,7 +9,7 @@ describe Blog do
   end
 
   it "greets the user by name" do
-    get "/", name: "Bob"
+    get "/?name=Bob"
     last_response.body.should include("Bob")
   end
 
