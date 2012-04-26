@@ -2,18 +2,15 @@ require "rack/test"
 require "rack"
 require "mustache"
 
-module Blog
-  extend self
+module Obvert
 
   def call(env)
     request = Rack::Request.new(env)
 
-    if request.path == "/"
-      render_home_page
-    elsif request.path =~ %r{/posts/([^/]+)}
-      find_and_render_post($1)
-    elsif request.path == "/broken"
-      some_broken_code
+    action, arguments = dispatch(request)
+
+    if action
+      action.call(*arguments)
     else
       not_found
     end
@@ -21,25 +18,26 @@ module Blog
     server_error(exception)
   end
 
-  def render_home_page
-    Rack::Response.new(Mustache.render(<<MUSTACHE, posts: posts))
-<ul>
-{{#posts}}
-  <li>{{title}}</li>
-{{/posts}}
-</ul>
-MUSTACHE
+  def dispatch(request)
+    arguments = []
+
+    _, action = routes.find { |(pattern, _)|
+      case pattern
+      when Regexp
+        match = pattern.match(request.path)
+        arguments = match.captures if match
+
+        match
+      else
+        pattern == request.path
+      end
+    }
+
+    [action, arguments] if action
   end
 
-  def find_and_render_post(id)
-    post = posts.find { |p| p.id == id }
-
-    Rack::Response.new(Mustache.render(<<MUSTACHE, post: post))
-{{#post}}
-<h1>{{title}}</h1>
-{{body}}
-{{/post}}
-MUSTACHE
+  def render_to_response(template_path, context)
+    Rack::Response.new(Mustache.render(File.read(template_path), context))
   end
 
   def not_found
@@ -52,6 +50,32 @@ Internal Server Error
 #{exception.inspect}
 #{exception.backtrace.join("\n")}
 ERROR
+  end
+
+  def add_route(pattern, &blk)
+    routes << [pattern, blk]
+  end
+
+  def routes
+    @routes ||= []
+  end
+end
+
+module Blog
+  extend self, Obvert
+
+  add_route("/")                { render_home_page }
+  add_route(%r{/posts/([^/]+)}) { |id| find_and_render_post(id) }
+  add_route("/broken")          { some_broken_code }
+
+  def render_home_page
+    render_to_response('templates/index.mustache', posts: posts)
+  end
+
+  def find_and_render_post(id)
+    post = posts.find { |p| p.id == id }
+
+    render_to_response('templates/post.mustache', post: post)
   end
 
   def posts
