@@ -1,4 +1,5 @@
 require File.expand_path("../../views/blog_index_view", __FILE__)
+require File.expand_path("../../views/blog_woo_view", __FILE__)
 
 class BlogController
   attr_reader :request
@@ -11,6 +12,10 @@ class BlogController
     view = BlogIndexView.new(request["name"])
 
     view.render_to_response
+  end
+
+  def woo
+    BlogWooView.render_to_response
   end
 end
 

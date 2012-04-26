@@ -17,4 +17,9 @@ describe Blog do
     get "/"
     last_response.body.should include("John Doe")
   end
+
+  it "supports regular expression routes" do
+    get "/woooo"
+    last_response.body.should include("And a woooo to you too!")
+  end
 end

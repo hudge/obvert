@@ -4,7 +4,7 @@ module Obvert
   class Application
     def call(env)
       request = Rack::Request.new(env)
-      dispatch_to(request.path, request)
+      dispatch(request)
     end
 
     def dispatcher
@@ -13,8 +13,8 @@ module Obvert
 
     private
 
-    def dispatch_to(path, request)
-      _, action = dispatcher.find { |route, _| route === request.path }
+    def dispatch(request)
+      _, action = dispatcher.find { |pattern, _| pattern === request.path }
 
       if action
         action.call(request)
